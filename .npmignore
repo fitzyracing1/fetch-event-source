@@ -13,3 +13,4 @@ tsconfig.json
 .idea
 *.iml
 test/
+!CHANGELOG.md
