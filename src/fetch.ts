@@ -5,6 +5,13 @@ export const EventStreamContentType = 'text/event-stream';
 const DefaultRetryInterval = 1000;
 const LastEventId = 'last-event-id';
 
+// Browser pages keep using `window` exactly as before (globalThis is missing in
+// some older browsers, e.g. Edge < 79); everywhere else (Node.js, Bun, web
+// workers) there is no `window`, so use globalThis.
+function getGlobalScope(): typeof globalThis {
+    return typeof window !== 'undefined' ? window : globalThis;
+}
+
 export interface FetchEventSourceInit extends RequestInit {
     /**
      * The request headers. FetchEventSource only supports the Record<string,string> format.
@@ -49,7 +56,7 @@ export interface FetchEventSourceInit extends RequestInit {
      */
     openWhenHidden?: boolean;
 
-    /** The Fetch function to use. Defaults to window.fetch */
+    /** The Fetch function to use. Defaults to window.fetch (globalThis.fetch where there is no window) */
     fetch?: typeof fetch;
 }
 
@@ -79,15 +86,20 @@ export function fetchEventSource(input: RequestInfo, {
             }
         }
 
-        if (!openWhenHidden) {
+        // There is no document (and no page visibility) outside the browser main
+        // thread, e.g. in Node.js, Bun or a web worker.
+        const hasDocument = typeof document !== 'undefined';
+        if (!openWhenHidden && hasDocument) {
             document.addEventListener('visibilitychange', onVisibilityChange);
         }
 
         let retryInterval = DefaultRetryInterval;
         let retryTimer = 0;
         function dispose() {
-            document.removeEventListener('visibilitychange', onVisibilityChange);
-            window.clearTimeout(retryTimer);
+            if (hasDocument) {
+                document.removeEventListener('visibilitychange', onVisibilityChange);
+            }
+            getGlobalScope().clearTimeout(retryTimer);
             curRequestController.abort();
         }
 
@@ -97,7 +109,7 @@ export function fetchEventSource(input: RequestInfo, {
             resolve(); // don't waste time constructing/logging errors
         });
 
-        const fetch = inputFetch ?? window.fetch;
+        const fetch = inputFetch ?? getGlobalScope().fetch;
         const onopen = inputOnOpen ?? defaultOnOpen;
         async function create() {
             curRequestController = new AbortController();
@@ -131,8 +143,9 @@ export function fetchEventSource(input: RequestInfo, {
                     try {
                         // check if we need to retry:
                         const interval: any = onerror?.(err) ?? retryInterval;
-                        window.clearTimeout(retryTimer);
-                        retryTimer = window.setTimeout(create, interval);
+                        const scope = getGlobalScope();
+                        scope.clearTimeout(retryTimer);
+                        retryTimer = scope.setTimeout(create, interval);
                     } catch (innerErr) {
                         // we should not retry anymore:
                         dispose();

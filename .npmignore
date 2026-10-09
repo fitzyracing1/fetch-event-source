@@ -12,3 +12,4 @@ tsconfig.json
 ## IntellIJ files
 .idea
 *.iml
+test/
