@@ -1,23 +1,43 @@
 {
-  "name": "@microsoft/fetch-event-source",
-  "version": "2.0.1",
-  "description": "A better API for making Event Source requests, with all the features of fetch()",
-  "homepage": "https://github.com/Azure/fetch-event-source#readme",
-  "repository": "github:Azure/fetch-event-source",
+  "name": "@fitzyracing/fetch-event-source",
+  "version": "2.0.2",
+  "description": "A better API for making Event Source requests, with all the features of fetch() (maintained fork of @microsoft/fetch-event-source that also works in Node.js)",
+  "homepage": "https://github.com/fitzyracing1/fetch-event-source#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fitzyracing1/fetch-event-source.git"
+  },
   "bugs": {
-    "url": "https://github.com/Azure/fetch-event-source/issues"
+    "url": "https://github.com/fitzyracing1/fetch-event-source/issues"
   },
   "author": "Microsoft",
+  "contributors": [
+    "Joshua Almeida (https://github.com/fitzyracing1)"
+  ],
+  "keywords": [
+    "fetch",
+    "eventsource",
+    "event-source",
+    "server-sent-events",
+    "sse",
+    "fetch-event-source",
+    "nodejs",
+    "fork"
+  ],
   "license": "MIT",
   "main": "lib/cjs/index.js",
   "module": "lib/esm/index.js",
   "types": "lib/cjs/index.d.ts",
   "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "clean": "rimraf ./lib ./coverage",
     "prebuild": "npm run clean",
     "build": "tsc && tsc -p tsconfig.esm.json",
-    "test": "nyc jasmine --config=jasmine.json",
+    "test": "nyc jasmine --config=jasmine.json && npm run test:node",
+    "test:node": "node --test test/*.test.js",
     "prepublishOnly": "npm run build && npm run test"
   },
   "devDependencies": {
