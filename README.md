@@ -67,8 +67,18 @@ via `module`, types in `lib/cjs/index.d.ts`).
 
 ### Using it as a drop-in replacement
 
-To keep your `import ... from '@microsoft/fetch-event-source'` lines, and to fix it inside
-dependencies that use it too, add an override to your `package.json`:
+If you depend on `@microsoft/fetch-event-source` yourself, install the fork under the old
+name, so every `import ... from '@microsoft/fetch-event-source'` keeps working unchanged:
+
+```bash
+npm install @microsoft/fetch-event-source@npm:@fitzyracing/fetch-event-source@^2.0.2
+```
+
+This writes `"@microsoft/fetch-event-source": "npm:@fitzyracing/fetch-event-source@^2.0.2"`
+into your `dependencies`.
+
+To fix it inside other packages that depend on `@microsoft/fetch-event-source`, add an
+override to your `package.json` (npm 8.3+):
 
 ```json
 {
@@ -78,15 +88,13 @@ dependencies that use it too, add an override to your `package.json`:
 }
 ```
 
+If you also have it as a direct dependency, npm requires the override to match it
+("Override for ... conflicts with direct dependency"), so do the install above first and
+then reference it instead: `"@microsoft/fetch-event-source": "$@microsoft/fetch-event-source"`.
+
 (Yarn: use `"resolutions"`; pnpm: `"pnpm": { "overrides": { ... } }`. Very early npm 9
 releases such as 9.2.0 reject aliased overrides with "Invalid comparator", so upgrade npm if
 you see that.)
-
-Or alias it directly in your own dependencies:
-
-```bash
-npm install @microsoft/fetch-event-source@npm:@fitzyracing/fetch-event-source
-```
 
 ### Tests
 
@@ -99,7 +107,8 @@ npm install @microsoft/fetch-event-source@npm:@fitzyracing/fetch-event-source
   aborting (including during a retry wait). Every request test fails on 2.0.1.
 - `test/browser.test.js` puts a fake `window` and `document` on `globalThis` and checks that
   the `visibilitychange` listener is still registered and removed, that hiding the page closes
-  the request and showing it reconnects with the last event ID, and that `openWhenHidden: true`
+  the request and showing it reconnects with the last event ID, that `fetch` and the retry
+  timers still come from `window`, and that `openWhenHidden: true`
   skips the listener. These pass on both 2.0.1 and the fork.
 
 To run the same tests against another build, for example the original 2.0.1 from npm:
