@@ -238,3 +238,8 @@ rather than a public issue. Vulnerabilities in the original package go to Micros
 notice are retained unchanged; fork changes are released under the same license.
 
 Original project: https://github.com/Azure/fetch-event-source
+
+## Documentation
+
+- In-repo docs: [docs/](docs/index.md)
+- Wiki: [https://github.com/fitzyracing1/fetch-event-source/wiki](https://github.com/fitzyracing1/fetch-event-source/wiki)
