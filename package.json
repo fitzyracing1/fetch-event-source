@@ -1,6 +1,6 @@
 {
   "name": "@fitzyracing/fetch-event-source",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "description": "A better API for making Event Source requests, with all the features of fetch() (maintained fork of @microsoft/fetch-event-source that also works in Node.js)",
   "homepage": "https://github.com/fitzyracing1/fetch-event-source#readme",
   "repository": {
